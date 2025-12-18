@@ -1,45 +1,68 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { join } from 'path';
 
 @Module({
   imports: [
+    ConfigModule,
+
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => {
-        const nodeEnv = configService.get<string>('NODE_ENV', 'development');
-        const isDev = nodeEnv === 'development';
-        const useSsl = !isDev;
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService): TypeOrmModuleOptions => {
+        const nodeEnv = configService.get<string>('NODE_ENV') ?? 'development';
+        const isProd = nodeEnv === 'production';
 
-        return {
+        const host = configService.get<string>('DB_HOST') ?? 'localhost';
+        const port = Number(configService.get<string>('DB_PORT') ?? '3306');
+        const username = configService.get<string>('DB_USERNAME') ?? 'root';
+        const password = configService.get<string>('DB_PASSWORD') ?? '';
+        const database = configService.get<string>('DB_NAME') ?? '';
+
+        const entities = [join(__dirname, '/../**/*.entity{.js,.ts}')];
+        const migrations = [join(__dirname, '/../migrations/*{.js,.ts}')];
+
+        const dbSsl =
+          (configService.get<string>('DB_SSL') ?? (isProd ? 'true' : 'false')) === 'true';
+
+        const base: TypeOrmModuleOptions = {
           type: 'mariadb',
-          host: configService.get<string>('DB_HOST', 'localhost'),
-          port: Number(configService.get<string>('DB_PORT', '3306')),
-          username: configService.get<string>('DB_USERNAME', 'root'),
-          password: configService.get<string>('DB_PASSWORD', ''),
-          database: configService.get<string>('DB_NAME', ''),
-          entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-          migrations: [__dirname + '/../migrations/*{.ts,.js}'],
+          host,
+          port,
+          username,
+          password,
+          database,
 
-          synchronize: isDev,
-          logging: isDev,
+          entities,
+          migrations,
+
+          // 운영 안전
+          synchronize: !isProd,
+
+          // 타입 안전하게 배열로
+          logging: isProd ? ['error'] : ['query', 'error', 'schema', 'warn'],
+
           charset: 'utf8mb4',
 
+          // ✅ 이 둘은 Nest 옵션이라 여기서 가능
           retryAttempts: 10,
           retryDelay: 3000,
-
-          ...(useSsl
-            ? {
-              ssl: true,
-              extra: {
-                ssl: { rejectUnauthorized: false },
-              },
-            }
-            : {}),
         };
+
+        if (dbSsl) {
+          return {
+            ...base,
+            ssl: true,
+            extra: {
+              ssl: { rejectUnauthorized: false },
+            },
+          };
+        }
+
+        return base;
       },
-      inject: [ConfigService],
     }),
   ],
 })
-export class DatabaseModule { }
+export class DatabaseModule {}
