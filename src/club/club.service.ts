@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, HttpException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Club } from './entities/club.entity';
 import { DataSource, In, Like, Repository } from 'typeorm';
@@ -554,6 +554,9 @@ export class ClubService {
       }
     } catch (error) {
       await queryRunner.rollbackTransaction();
+      if (error instanceof HttpException) {
+        throw error;
+      }
       throw new InternalServerErrorException("서버 에러가 발생했습니다.")
     } finally {
       await queryRunner.release();
@@ -736,6 +739,9 @@ export class ClubService {
       }
     } catch (error) {
       await queryRunner.rollbackTransaction();
+      if (error instanceof HttpException) {
+        throw error;
+      }
       throw new InternalServerErrorException("서버 에러가 발생하였습니다.")
     } finally {
       await queryRunner.release();
