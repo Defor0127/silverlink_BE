@@ -1,9 +1,8 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Faq } from './entities/faq.entity';
 import { Repository } from 'typeorm';
 import { CreateFaqDto } from './dto/create-faq.dto';
-import { Role } from '@/user/enum/role.enum';
 import { UpdateFaqDto } from './dto/update-faq-dto';
 
 @Injectable()
@@ -23,10 +22,7 @@ export class FaqService {
     }
   }
 
-  async createFaq(role: Role, createFaqDto: CreateFaqDto) {
-    if (role !== 'ADMIN') {
-      throw new UnauthorizedException("대상에 대한 접근 권한이 없습니다.")
-    }
+  async createFaq(createFaqDto: CreateFaqDto) {
     const faqToCreate = this.faqRepository.create({
       ...createFaqDto
     })
@@ -52,10 +48,7 @@ export class FaqService {
     }
   }
 
-  async updateFaq(role: Role, faqId: number, updateFaqDto: UpdateFaqDto) {
-    if (role !== 'ADMIN') {
-      throw new UnauthorizedException("대상에 대한 접근 권한이 없습니다.")
-    }
+  async updateFaq(faqId: number, updateFaqDto: UpdateFaqDto) {
     const faqToUpdate = await this.faqRepository.findOne({
       where: { id: faqId }
     })
@@ -70,10 +63,7 @@ export class FaqService {
     }
   }
 
-  async deleteFaq(role: Role, faqId: number) {
-    if (role !== 'ADMIN') {
-      throw new UnauthorizedException("대상에 대한 접근 권한이 없습니다.")
-    }
+  async deleteFaq(faqId: number) {
     const faqToDelete = await this.faqRepository.findOne({
       where: { id: faqId }
     })

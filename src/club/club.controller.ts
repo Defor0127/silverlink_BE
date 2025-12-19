@@ -1,7 +1,10 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ClubService } from './club.service';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { RolesGuard } from '@/common/guards/roles.guard';
+import { Roles } from '@/common/decorators/roles.decorator';
 import { User } from '@/common/decorators/user.decorator';
+import { Role } from '@/user/enum/role.enum';
 import { CreateClubDto } from './dto/create-club.dto';
 import { UpdateClubDto } from './dto/update-club.dto';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
@@ -199,7 +202,8 @@ export class ClubController {
   }
 
   @Post('/:clubId/activate')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '모임 활성화', description: '모임을 활성화합니다. (ADMIN만 가능)' })
   @ApiParam({ name: 'clubId', description: '모임 ID' })
@@ -207,14 +211,14 @@ export class ClubController {
   @ApiResponse({ status: 401, description: '권한 없음' })
   @ApiResponse({ status: 404, description: '모임을 찾을 수 없음' })
   async activateClub(
-    @Param('clubId') clubId: number,
-    @User('role') role: string
+    @Param('clubId') clubId: number
   ) {
-    return this.clubService.activateClub(clubId, role)
+    return this.clubService.activateClub(clubId)
   }
 
   @Post('/:clubId/pause')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '모임 일시정지', description: '모임을 일시정지합니다. (ADMIN만 가능)' })
   @ApiParam({ name: 'clubId', description: '모임 ID' })
@@ -222,10 +226,9 @@ export class ClubController {
   @ApiResponse({ status: 401, description: '권한 없음' })
   @ApiResponse({ status: 404, description: '모임을 찾을 수 없음' })
   async pauseClub(
-    @Param('clubId') clubId: number,
-    @User('role') role: string
+    @Param('clubId') clubId: number
   ) {
-    return this.clubService.pauseClub(clubId, role)
+    return this.clubService.pauseClub(clubId)
   }
 
   @Post('/:clubId/join')

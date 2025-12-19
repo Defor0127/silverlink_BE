@@ -3,7 +3,8 @@ import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
-import { User } from '@/common/decorators/user.decorator';
+import { RolesGuard } from '@/common/guards/roles.guard';
+import { Roles } from '@/common/decorators/roles.decorator';
 import { Role } from '@/user/enum/role.enum';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 
@@ -13,7 +14,8 @@ export class CategoryController {
   constructor(private readonly categoryService: CategoryService) { }
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '카테고리 생성', description: '새로운 카테고리를 생성합니다. (ADMIN만 접근 가능)' })
   @ApiBody({ type: CreateCategoryDto })
@@ -21,10 +23,9 @@ export class CategoryController {
   @ApiResponse({ status: 401, description: '권한 없음' })
   @ApiResponse({ status: 409, description: '이미 존재하는 카테고리명' })
   async createCategory(
-    @Body() createCategoryDto: CreateCategoryDto,
-    @User('role') role: Role
+    @Body() createCategoryDto: CreateCategoryDto
   ) {
-    return this.categoryService.createCategory(role, createCategoryDto)
+    return this.categoryService.createCategory(createCategoryDto)
   }
 
   @Get()
@@ -42,17 +43,17 @@ export class CategoryController {
   }
 
   @Post('/hub')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '허브 카테고리 생성', description: '새로운 허브 카테고리를 생성합니다. (ADMIN만 접근 가능)' })
   @ApiBody({ type: CreateCategoryDto })
   @ApiResponse({ status: 201, description: '카테고리 생성 성공' })
   @ApiResponse({ status: 401, description: '권한 없음' })
   async createHubCategory(
-    @Body() createCategoryDto: CreateCategoryDto,
-    @User('role') role: Role
+    @Body() createCategoryDto: CreateCategoryDto
   ) {
-    return this.categoryService.createHubCategory(role, createCategoryDto)
+    return this.categoryService.createHubCategory(createCategoryDto)
   }
 
   @Get('/:categoryId')
@@ -67,7 +68,8 @@ export class CategoryController {
   }
 
   @Patch('/:categoryId')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '카테고리 수정', description: '카테고리 정보를 수정합니다. (ADMIN만 접근 가능)' })
   @ApiParam({ name: 'categoryId', description: '카테고리 ID' })
@@ -77,14 +79,14 @@ export class CategoryController {
   @ApiResponse({ status: 404, description: '카테고리를 찾을 수 없음' })
   async updateCategory(
     @Param('categoryId') categoryId: number,
-    @Body() updateCategoryDto: UpdateCategoryDto,
-    @User('role') role: Role
+    @Body() updateCategoryDto: UpdateCategoryDto
   ) {
-    return this.categoryService.updateCategory(role, categoryId, updateCategoryDto)
+    return this.categoryService.updateCategory(categoryId, updateCategoryDto)
   }
 
   @Delete('/:categoryId')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '카테고리 삭제', description: '카테고리를 삭제합니다. (ADMIN만 접근 가능)' })
   @ApiParam({ name: 'categoryId', description: '카테고리 ID' })
@@ -92,10 +94,9 @@ export class CategoryController {
   @ApiResponse({ status: 401, description: '권한 없음' })
   @ApiResponse({ status: 404, description: '카테고리를 찾을 수 없음' })
   async deleteCategory(
-    @Param('categoryId') categoryId: number,
-    @User('role') role: Role
+    @Param('categoryId') categoryId: number
   ) {
-    return this.categoryService.deleteCategory(role, categoryId)
+    return this.categoryService.deleteCategory(categoryId)
   }
 
   @Get('/count/post/:categoryId')

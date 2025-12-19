@@ -10,6 +10,8 @@ import {
 import { HubService } from "./hub.service";
 import { CreateHubContentDto } from "./dto/create-hub-content.dto";
 import { JwtAuthGuard } from "@/common/guards/jwt-auth.guard";
+import { RolesGuard } from "@/common/guards/roles.guard";
+import { Roles } from "@/common/decorators/roles.decorator";
 import { User } from "@/common/decorators/user.decorator";
 import { Role } from "@/user/enum/role.enum";
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
@@ -20,7 +22,8 @@ export class HubController {
   constructor(private readonly hubService: HubService) { }
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '허브 콘텐츠 생성', description: '새로운 허브 콘텐츠를 생성합니다. (ADMIN만 접근 가능)' })
   @ApiBody({ type: CreateHubContentDto })
@@ -28,10 +31,9 @@ export class HubController {
   @ApiResponse({ status: 401, description: '권한 없음' })
   async createHubContent(
     @Body() createHubContentDto: CreateHubContentDto,
-    @User('role') role: Role,
     @User('userId') userId: number
   ) {
-    return this.hubService.createHubContent(userId, role, createHubContentDto);
+    return this.hubService.createHubContent(userId, createHubContentDto);
   }
 
   @Get()

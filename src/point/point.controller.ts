@@ -4,6 +4,8 @@ import { ChargePointDto } from './dto/charge-point.dto';
 import { ChargePointByPackageDto } from './dto/charge-point-by-package.dto';
 import { UsePointDto } from './dto/use-point.dto';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { RolesGuard } from '@/common/guards/roles.guard';
+import { Roles } from '@/common/decorators/roles.decorator';
 import { User } from '@/common/decorators/user.decorator';
 import { Role } from '@/user/enum/role.enum';
 import { CreatePackageDto } from './dto/create-package.dto';
@@ -95,17 +97,17 @@ export class PointController {
   }
 
   @Post('/package')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '포인트 패키지 생성', description: '새로운 포인트 패키지를 생성합니다. (ADMIN만 접근 가능)' })
   @ApiBody({ type: CreatePackageDto })
   @ApiResponse({ status: 201, description: '패키지 생성 성공' })
   @ApiResponse({ status: 403, description: '권한 없음' })
   async createPointPackage(
-    @User('role') role: Role,
     @Body() createPackageDto: CreatePackageDto
   ) {
-    return this.pointService.createPointPackage(role, createPackageDto)
+    return this.pointService.createPointPackage(createPackageDto)
   }
 
   @Get('/package/:packageId')
@@ -122,7 +124,8 @@ export class PointController {
   }
 
   @Delete('/package/:packageId')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '포인트 패키지 삭제', description: '포인트 패키지를 삭제합니다. (ADMIN만 접근 가능)' })
   @ApiParam({ name: 'packageId', description: '패키지 ID' })
@@ -130,14 +133,14 @@ export class PointController {
   @ApiResponse({ status: 403, description: '권한 없음' })
   @ApiResponse({ status: 404, description: '패키지를 찾을 수 없음' })
   async deletePointPackage(
-    @User('role') role: Role,
     @Param('packageId') packageId: number
   ) {
-    return this.pointService.deletePointPackage(role, packageId)
+    return this.pointService.deletePointPackage(packageId)
   }
 
   @Patch('/package/:packageId')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '포인트 패키지 수정', description: '포인트 패키지 정보를 수정합니다. (ADMIN만 접근 가능)' })
   @ApiParam({ name: 'packageId', description: '패키지 ID' })
@@ -146,10 +149,9 @@ export class PointController {
   @ApiResponse({ status: 403, description: '권한 없음' })
   @ApiResponse({ status: 404, description: '패키지를 찾을 수 없음' })
   async updatePointPackage(
-    @User('role') role: Role,
     @Param('packageId') packageId: number,
     @Body() updatePackageDto: UpdatePackageDto
   ) {
-    return this.pointService.updatePointPackage(role, packageId, updatePackageDto)
+    return this.pointService.updatePointPackage(packageId, updatePackageDto)
   }
 }

@@ -2,7 +2,8 @@ import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@n
 import { FaqService } from './faq.service';
 import { CreateFaqDto } from './dto/create-faq.dto';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
-import { User } from '@/common/decorators/user.decorator';
+import { RolesGuard } from '@/common/guards/roles.guard';
+import { Roles } from '@/common/decorators/roles.decorator';
 import { Role } from '@/user/enum/role.enum';
 import { UpdateFaqDto } from './dto/update-faq-dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
@@ -13,17 +14,17 @@ export class FaqController {
   constructor(private readonly faqService: FaqService) { }
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'FAQ 작성', description: '새로운 FAQ를 작성합니다. (ADMIN만 접근 가능)' })
   @ApiBody({ type: CreateFaqDto })
   @ApiResponse({ status: 201, description: 'FAQ 작성 성공' })
   @ApiResponse({ status: 401, description: '권한 없음' })
   async createFaq(
-    @Body() createFaqDto: CreateFaqDto,
-    @User('role') role: Role
+    @Body() createFaqDto: CreateFaqDto
   ) {
-    return this.faqService.createFaq(role, createFaqDto)
+    return this.faqService.createFaq(createFaqDto)
   }
 
   @Get()
@@ -45,7 +46,8 @@ export class FaqController {
   }
 
   @Patch('/:faqId')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'FAQ 수정', description: 'FAQ를 수정합니다. (ADMIN만 접근 가능)' })
   @ApiParam({ name: 'faqId', description: 'FAQ ID' })
@@ -54,15 +56,15 @@ export class FaqController {
   @ApiResponse({ status: 401, description: '권한 없음' })
   @ApiResponse({ status: 404, description: 'FAQ를 찾을 수 없음' })
   async updateFaq(
-    @User('role') role: Role,
     @Param('faqId') faqId: number,
     @Body() updateFaqDto: UpdateFaqDto
   ) {
-    return this.faqService.updateFaq(role, faqId, updateFaqDto)
+    return this.faqService.updateFaq(faqId, updateFaqDto)
   }
 
   @Delete('/:faqId')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'FAQ 삭제', description: 'FAQ를 삭제합니다. (ADMIN만 접근 가능)' })
   @ApiParam({ name: 'faqId', description: 'FAQ ID' })
@@ -70,10 +72,9 @@ export class FaqController {
   @ApiResponse({ status: 401, description: '권한 없음' })
   @ApiResponse({ status: 404, description: 'FAQ를 찾을 수 없음' })
   async deleteFaq(
-    @User('role') role: Role,
-    @Param('faqId') faqId: number,
+    @Param('faqId') faqId: number
   ) {
-    return this.faqService.deleteFaq(role, faqId)
+    return this.faqService.deleteFaq(faqId)
   }
 }
 

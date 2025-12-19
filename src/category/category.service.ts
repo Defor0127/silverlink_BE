@@ -1,10 +1,9 @@
-import { ConflictException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Category } from './entities/category.entity';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { Role } from '@/user/enum/role.enum';
 import { Club } from '@/club/entities/club.entity';
 import { Post } from '@/post/entities/post.entity';
 import { EntityLookupService } from '@/common/services/entity-lookup.service';
@@ -21,10 +20,7 @@ export class CategoryService {
     private readonly entityLookupService: EntityLookupService
   ) { }
 
-  async createCategory(role: Role, createCategoryDto: CreateCategoryDto) {
-    if (role !== 'ADMIN') {
-      throw new UnauthorizedException("대상에 대한 접근 권한이 없습니다.")
-    }
+  async createCategory(createCategoryDto: CreateCategoryDto) {
     const nameExist = await this.categoryRepository.findOne({
       where: { name: createCategoryDto.name, type: 'NORMAL' }
     })
@@ -65,10 +61,7 @@ export class CategoryService {
     }
   }
 
-  async updateCategory(role: Role, categoryId: number, updateCategoryDto: UpdateCategoryDto) {
-    if (role !== 'ADMIN') {
-      throw new UnauthorizedException("대상에 대한 접근 권한이 없습니다.")
-    }
+  async updateCategory(categoryId: number, updateCategoryDto: UpdateCategoryDto) {
     const categoryExist = await this.entityLookupService.findOneOrThrow(
       this.categoryRepository,
       { id: categoryId },
@@ -90,10 +83,7 @@ export class CategoryService {
     }
   }
 
-  async deleteCategory(role: Role, categoryId: number) {
-    if (role !== 'ADMIN') {
-      throw new UnauthorizedException("대상에 대한 접근 권한이 없습니다.")
-    }
+  async deleteCategory(categoryId: number) {
     const categoryExist = await this.entityLookupService.findOneOrThrow(
       this.categoryRepository,
       { id: categoryId },
@@ -130,10 +120,7 @@ export class CategoryService {
     }
   }
 
-  async createHubCategory(role: Role, createCategoryDto: CreateCategoryDto) {
-    if (role !== 'ADMIN') {
-      throw new UnauthorizedException("대상에 대한 접근 권한이 없습니다.")
-    }
+  async createHubCategory(createCategoryDto: CreateCategoryDto) {
     const nameExist = await this.categoryRepository.findOne({
       where: { name: createCategoryDto.name, type: 'HUB' }
     })

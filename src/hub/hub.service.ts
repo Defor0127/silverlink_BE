@@ -1,10 +1,9 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm';
 import { SeniorContent } from './entities/senior-content.entity';
 import { CreateHubContentDto } from './dto/create-hub-content.dto';
 import { UpdateHubContentDto } from './dto/update-hub-content.dto';
-import { Role } from '@/user/enum/role.enum';
 import { Category } from '@/category/entities/category.entity';
 import { EntityLookupService } from '@/common/services/entity-lookup.service';
 
@@ -20,10 +19,7 @@ export class HubService {
     private readonly entityLookupService: EntityLookupService
   ) { }
 
-  async createHubContent(userId: number, role: Role, createHubContentDto: CreateHubContentDto) {
-    if (role !== 'ADMIN') {
-      throw new UnauthorizedException("대상에 대한 접근 권한이 없습니다.")
-    }
+  async createHubContent(userId: number, createHubContentDto: CreateHubContentDto) {
     const isHubCategory = await this.categoryRepository.findOne({
       where: { id: createHubContentDto.categoryId, type: 'HUB' }
     })

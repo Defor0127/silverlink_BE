@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { Users } from '@/user/entities/user.entity';
@@ -8,7 +8,6 @@ import { ChargePointByPackageDto } from './dto/charge-point-by-package.dto';
 import { UsePointDto } from './dto/use-point.dto';
 import { PointPackage } from './entities/point-package.entity';
 import { CreatePackageDto } from './dto/create-package.dto';
-import { Role } from '@/user/enum/role.enum';
 import { UpdatePackageDto } from './dto/update-package.dto';
 
 @Injectable()
@@ -232,10 +231,7 @@ export class PointService {
     }
   }
 
-  async createPointPackage(role: Role, createPackageDto: CreatePackageDto) {
-    if (role !== 'ADMIN') {
-      throw new UnauthorizedException("대상에 대한 접근 권한이 없습니다.")
-    }
+  async createPointPackage(createPackageDto: CreatePackageDto) {
     const packageToCreate = this.pointPackageRepository.create({
       ...createPackageDto
     })
@@ -256,10 +252,7 @@ export class PointService {
     }
   }
 
-  async updatePointPackage(role: Role, packageId: number, updatePackageDto: UpdatePackageDto) {
-    if (role !== 'ADMIN') {
-      throw new UnauthorizedException("대상에 대한 접근 권한이 없습니다.")
-    }
+  async updatePointPackage(packageId: number, updatePackageDto: UpdatePackageDto) {
     const packageToUpdate = await this.pointPackageRepository.findOne({
       where: { id: packageId }
     })
@@ -274,10 +267,7 @@ export class PointService {
     }
   }
 
-  async deletePointPackage(role: Role, packageId: number) {
-    if (role !== 'ADMIN') {
-      throw new UnauthorizedException("대상에 대한 접근 권한이 없습니다.")
-    }
+  async deletePointPackage(packageId: number) {
     const deleteResult = await this.pointPackageRepository.delete({
       id: packageId
     })

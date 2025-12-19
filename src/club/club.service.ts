@@ -263,10 +263,7 @@ export class ClubService {
     }
   }
 
-  async activateClub(clubId: number, role: string) {
-    if (role !== 'ADMIN') {
-      throw new ForbiddenException("접근 권한이 없습니다.")
-    }
+  async activateClub(clubId: number) {
     const targetClub = await this.entityLookupService.findOneOrThrow(
       this.clubRepository,
       { id: clubId },
@@ -288,10 +285,7 @@ export class ClubService {
     }
   }
 
-  async pauseClub(clubId: number, role: string) {
-    if (role !== 'ADMIN') {
-      throw new ForbiddenException("접근 권한이 없습니다.")
-    }
+  async pauseClub(clubId: number) {
     const targetClub = await this.entityLookupService.findOneOrThrow(
       this.clubRepository,
       { id: clubId },
