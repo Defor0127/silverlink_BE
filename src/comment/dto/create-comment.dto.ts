@@ -2,11 +2,6 @@ import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateCommentDto {
-  @ApiProperty({ description: '사용자 ID', example: 1 })
-  @IsNotEmpty()
-  @IsNumber()
-  userId: number;
-
   @ApiProperty({ description: '게시글 ID', example: 1 })
   @IsNotEmpty()
   @IsNumber()
@@ -20,5 +15,5 @@ export class CreateCommentDto {
   @ApiProperty({ description: '부모 댓글 ID (답글인 경우)', example: 1, required: false })
   @IsOptional()
   @IsNumber()
-  parentCommentId: number | null;
+  parentCommentId?: number | null;
 }

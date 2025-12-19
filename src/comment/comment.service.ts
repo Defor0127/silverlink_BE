@@ -22,129 +22,97 @@ export class CommentService {
     private readonly entityLookupService: EntityLookupService
   ) { }
 
-  async createComment(createCommentDto: CreateCommentDto) {
-    try {
-      const commentToCreate = this.commentRepository.create({
-        ...createCommentDto,
+  async createComment(userId: number, createCommentDto: CreateCommentDto) {
+    const commentToCreate = this.commentRepository.create({
+      ...createCommentDto,
+      userId
+    })
+    // 답글일 경우
+    if (createCommentDto.parentCommentId) {
+      const parentComment = await this.commentRepository.findOne({
+        where: { id: createCommentDto.parentCommentId }
       })
-      const saved = await this.commentRepository.save(commentToCreate)
-      return {
-        message: "댓글이 생성되었습니다.",
-        data: saved
+      if (!parentComment) {
+        throw new NotFoundException("답글 대상 댓글이 존재하지 않습니다.")
       }
-    } catch (error) {
-      throw new InternalServerErrorException("서버 에러가 발생했습니다.")
-    }
-  }
-
-  async updateComment(commentId: number, updateCommentDto: UpdateCommentDto, userId: number) {
-    try {
-      const commentToUpdate = await this.commentRepository.findOne({
-        where: { id: commentId }
-      })
-      if (!commentToUpdate) {
-        throw new NotFoundException("대상 댓글이 존재하지 않습니다.")
-      }
-      if (commentToUpdate.userId !== userId) {
-        throw new ForbiddenException("댓글 작성자만 수정할 수 있습니다.")
-      }
-      Object.assign(commentToUpdate, updateCommentDto)
-      const updatedComment = await this.commentRepository.save(commentToUpdate)
-      return {
-        message: "대상 댓글 수정에 성공했습니다.",
-        data: updatedComment
-      }
-    } catch (error) {
-      if (error instanceof NotFoundException || error instanceof ForbiddenException) {
-        throw error;
-      }
-      throw new InternalServerErrorException("서버 에러가 발생했습니다.")
-    }
-  }
-
-  async deleteComment(commentId: number, userId: number) {
-    try {
-      const commentToDelete = await this.commentRepository.findOne({
-        where: { id: commentId }
-      })
-      if (!commentToDelete) {
-        throw new NotFoundException("대상 댓글이 존재하지 않습니다.")
-      }
-      if (commentToDelete.userId !== userId) {
-        throw new ForbiddenException("댓글 작성자만 삭제할 수 있습니다.")
-      }
-      const deleteResult = await this.commentRepository.delete({
-        id: commentId
-      })
-      if (!deleteResult || deleteResult.affected === 0) {
-        throw new InternalServerErrorException("대상 댓글 삭제에 실패하였습니다.")
-      }
-      return {
-        message: "대상 댓글 삭제에 성공하였습니다."
-      }
-    } catch (error) {
-      if (error instanceof NotFoundException || error instanceof ForbiddenException) {
-        throw error;
-      }
-      throw new InternalServerErrorException("서버 에러가 발생했습니다.")
-    }
-  }
-
-  async createCommentReply(commentId: number, createCommentDto: CreateCommentDto) {
-    try {
-      //게시글 작성자만 답글 가능
+      // 내 작성글 맞는지
       const isMatch = await this.postRepository.findOne({
-        where: { userId: createCommentDto.userId, id: createCommentDto.postId }
+        where: { userId, id: createCommentDto.postId }
       })
       if (!isMatch) {
         throw new ForbiddenException("게시글 작성자만 답글을 달 수 있습니다.")
       }
-      const commentExist = await this.entityLookupService.findOneOrThrow(
-        this.commentRepository,
-        { id: commentId },
-        "대상 댓글이 존재하지 않습니다."
-      )
-      const replyToCreate = this.commentRepository.create({
-        ...createCommentDto,
-        parent: { id: commentId }
-      })
-      const saved = await this.commentRepository.save(replyToCreate)
+      const saved = await this.commentRepository.save(commentToCreate)
       return {
-        message: "답글이 작성되었습니다.",
-        data: {
-          comment: commentExist,
-          reply: saved
-        }
+        message: "답글 생성에 성공했습니다.",
+        data: saved
       }
-    } catch (error) {
-      throw new InternalServerErrorException("서버 에러가 발생했습니다.")
+    }
+    // 그냥 댓글일 경우
+    const saved = await this.commentRepository.save(commentToCreate)
+    return {
+      message: "댓글 생성에 성공했습니다.",
+      data: saved
     }
   }
 
+  async updateComment(commentId: number, updateCommentDto: UpdateCommentDto, userId: number) {
+    const commentToUpdate = await this.commentRepository.findOne({
+      where: { id: commentId }
+    })
+    if (!commentToUpdate) {
+      throw new NotFoundException("대상 댓글이 존재하지 않습니다.")
+    }
+    if (commentToUpdate.userId !== userId) {
+      throw new ForbiddenException("댓글 작성자만 수정할 수 있습니다.")
+    }
+    Object.assign(commentToUpdate, updateCommentDto)
+    const updatedComment = await this.commentRepository.save(commentToUpdate)
+    return {
+      message: "대상 댓글 수정에 성공했습니다.",
+      data: updatedComment
+    }
+  }
+
+  async deleteComment(commentId: number, userId: number) {
+    const commentToDelete = await this.commentRepository.findOne({
+      where: { id: commentId }
+    })
+    if (!commentToDelete) {
+      throw new NotFoundException("대상 댓글이 존재하지 않습니다.")
+    }
+    if (commentToDelete.userId !== userId) {
+      throw new ForbiddenException("댓글 작성자만 삭제할 수 있습니다.")
+    }
+    const deleteResult = await this.commentRepository.delete({
+      id: commentId
+    })
+    if (!deleteResult || deleteResult.affected === 0) {
+      throw new InternalServerErrorException("대상 댓글 삭제에 실패하였습니다.")
+    }
+    return {
+      message: "대상 댓글 삭제에 성공하였습니다."
+    }
+  }
+
+
   async getReplies(commentId: number) {
-    try {
-      const repliesToGet = await this.commentRepository.findOne({
-        where: { id: commentId },
-        relations: ['children']
-      })
-      if (!repliesToGet) {
-        throw new NotFoundException("대상 댓글이 존재하지 않습니다.")
-      }
-      if (!repliesToGet.children || repliesToGet.children.length === 0) {
-        return {
-          message: "답글이 없습니다.",
-          data: []
-        }
-      }
+    const repliesToGet = await this.commentRepository.findOne({
+      where: { id: commentId },
+      relations: ['children']
+    })
+    if (!repliesToGet) {
+      throw new NotFoundException("대상 댓글이 존재하지 않습니다.")
+    }
+    if (!repliesToGet.children || repliesToGet.children.length === 0) {
       return {
-        message: "답글을 전부 조회하였습니다.",
-        data: repliesToGet.children
+        message: "답글이 없습니다.",
+        data: []
       }
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      throw new InternalServerErrorException("서버 에러가 발생했습니다.")
+    }
+    return {
+      message: "답글을 전부 조회하였습니다.",
+      data: repliesToGet.children
     }
   }
 

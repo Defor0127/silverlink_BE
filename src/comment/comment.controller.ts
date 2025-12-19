@@ -20,9 +20,10 @@ export class CommentController {
   @ApiResponse({ status: 201, description: '댓글 작성 성공' })
   @ApiResponse({ status: 404, description: '게시글을 찾을 수 없음' })
   async createComment(
-    @Body() createCommentDto: CreateCommentDto
+    @Body() createCommentDto: CreateCommentDto,
+    @User('userId') userId: number
   ) {
-    return this.commentService.createComment(createCommentDto)
+    return this.commentService.createComment(userId, createCommentDto)
   }
 
   @Patch("/:commentId")
@@ -55,22 +56,6 @@ export class CommentController {
     @User('userId') userId: number
   ) {
     return this.commentService.deleteComment(commentId, userId)
-  }
-
-  @Post('/:commentId/reply')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: '답글 작성', description: '댓글에 답글을 작성합니다. (게시글 작성자만 가능)' })
-  @ApiParam({ name: 'commentId', description: '댓글 ID' })
-  @ApiBody({ type: CreateCommentDto })
-  @ApiResponse({ status: 201, description: '답글 작성 성공' })
-  @ApiResponse({ status: 403, description: '답글 작성 권한 없음' })
-  @ApiResponse({ status: 404, description: '댓글을 찾을 수 없음' })
-  async createReply(
-    @Body() createCommentDto: CreateCommentDto,
-    @Param('commentId') commentId: number
-  ) {
-    return this.commentService.createCommentReply(commentId,createCommentDto)
   }
 
   @Get('/:commentId/replies')
