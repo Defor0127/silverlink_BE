@@ -11,9 +11,6 @@ export class Notice {
   @Column({ type: 'text' })
   content: string;
 
-  @Column({ nullable: true })
-  category: string;
-
   @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 

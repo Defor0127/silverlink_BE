@@ -12,9 +12,5 @@ export class CreateNoticeDto {
   @IsString()
   content: string;
 
-  @ApiProperty({ description: '공지사항 카테고리' })
-  @IsNotEmpty()
-  @IsString()
-  category: string;
 }
 

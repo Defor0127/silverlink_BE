@@ -37,13 +37,17 @@ export class HubController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '허브 콘텐츠 목록 조회', description: '전체 허브 콘텐츠 목록을 조회합니다.' })
   @ApiResponse({ status: 200, description: '콘텐츠 목록 조회 성공' })
-  async getHubContents(){
+  async getHubContents() {
     return this.hubService.getHubContents()
   }
 
   @Get("/search")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '허브 콘텐츠 검색', description: '제목으로 허브 콘텐츠를 검색합니다.' })
   @ApiQuery({ name: 'keyword', description: '검색 키워드' })
   @ApiResponse({ status: 200, description: '검색 결과 조회 성공' })
@@ -54,6 +58,8 @@ export class HubController {
   }
 
   @Get("/:contentId")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '허브 콘텐츠 상세 조회', description: '특정 허브 콘텐츠의 상세 정보를 조회합니다.' })
   @ApiParam({ name: 'contentId', description: '콘텐츠 ID' })
   @ApiResponse({ status: 200, description: '콘텐츠 조회 성공' })
@@ -64,16 +70,16 @@ export class HubController {
     return this.hubService.getHubContent(contentId);
   }
 
-    @Get('/category/:categoryId')
-    @UseGuards(JwtAuthGuard)
-    @ApiBearerAuth('JWT-auth')
-    @ApiOperation({summary: '카테고리별 허브 콘텐츠 조회', description: '카테고리별 허브 콘텐츠 목록을 조회합니다.'})
-    @ApiParam({ name: 'categoryId', description: '카테고리 ID' })
-    @ApiResponse({status:200,description:'카테고리별 허브 콘텐츠 목록 조회 성공'})
-    @ApiResponse({ status: 404, description: '카테고리를 찾을 수 없음' })
-    async getHubContentsByCategory(
-      @Param('categoryId') categoryId: number
-    ){
-      return this.hubService.getHubContentByCategory(categoryId)
-    }
+  @Get('/category/:categoryId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: '카테고리별 허브 콘텐츠 조회', description: '카테고리별 허브 콘텐츠 목록을 조회합니다.' })
+  @ApiParam({ name: 'categoryId', description: '카테고리 ID' })
+  @ApiResponse({ status: 200, description: '카테고리별 허브 콘텐츠 목록 조회 성공' })
+  @ApiResponse({ status: 404, description: '카테고리를 찾을 수 없음' })
+  async getHubContentsByCategory(
+    @Param('categoryId') categoryId: number
+  ) {
+    return this.hubService.getHubContentByCategory(categoryId)
+  }
 }

@@ -157,6 +157,7 @@ export class CategoryService {
       .getRawMany()
     return {
       data: targetCategoryWithCounts,
+      message: targetCategoryWithCounts.length === 0 ? "대상 카테고리의 게시물이 존재하지 않습니다" : "대상 카테고리에 해당하는 게시물 수를 반환합니다."
     }
   }
 
@@ -177,6 +178,7 @@ export class CategoryService {
       .getRawMany()
     return {
       data: targetCategoryWithCounts,
+      message: targetCategoryWithCounts.length === 0 ? "대상 카테고리의 모임이 존재하지 않습니다" : "대상 카테고리에 해당하는 모임 수를 반환합니다."
     }
   }
 }
