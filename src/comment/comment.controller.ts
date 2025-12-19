@@ -78,10 +78,10 @@ export class CommentController {
   @ApiResponse({ status: 200, description: '좋아요 처리 성공' })
   @ApiResponse({ status: 404, description: '댓글을 찾을 수 없음' })
   async addLikeToComment(
-    @Body() commentLikeDto: CommentLikeDto,
-    @Param('commentId') commentId: number
+    @Param('commentId') commentId: number,
+    @User('userId') userId: number
   ) {
-    return this.commentService.toggleCommentLike(commentId, commentLikeDto)
+    return this.commentService.toggleCommentLike(commentId, userId)
   }
 }
 

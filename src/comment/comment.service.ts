@@ -95,7 +95,6 @@ export class CommentService {
     }
   }
 
-
   async getReplies(commentId: number) {
     const repliesToGet = await this.commentRepository.findOne({
       where: { id: commentId },
@@ -116,7 +115,7 @@ export class CommentService {
     }
   }
 
-  async toggleCommentLike(commentId: number, commentLikeDto: CommentLikeDto) {
+  async toggleCommentLike(commentId: number, userId: number) {
     const queryRunner = this.dataSource.createQueryRunner()
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -131,7 +130,7 @@ export class CommentService {
         throw new NotFoundException("대상 댓글이 없습니다.")
       }
       const likeExist = await commentLikeRepo.findOne({
-        where: { commentId: commentId, userId: commentLikeDto.userId }
+        where: { commentId, userId }
       })
       if (likeExist) {
         await queryRunner.manager.decrement(
@@ -142,7 +141,7 @@ export class CommentService {
         )
         await queryRunner.manager.delete(
           CommentLike,
-          { commentId, userId: commentLikeDto.userId }
+          { commentId, userId }
         )
         await queryRunner.commitTransaction()
         return {
@@ -156,7 +155,7 @@ export class CommentService {
         1
       )
       const newLike = queryRunner.manager.create(CommentLike, {
-        commentId, userId: commentLikeDto.userId
+        commentId, userId
       })
       await commentLikeRepo.save(newLike)
       await queryRunner.commitTransaction();
