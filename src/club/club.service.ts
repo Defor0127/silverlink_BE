@@ -532,6 +532,10 @@ export class ClubService {
         await queryRunner.rollbackTransaction();
         throw new ConflictException("이미 대상 모임에 가입된 유저입니다.")
       }
+      if(clubExist.status !== 'ACTIVE' ){
+        await queryRunner.rollbackTransaction();
+        throw new BadRequestException("활성 상태의 모임이 아닙니다.")
+      }
       if (clubExist.joinMode === 'AUTO') {
         const memberToCreate = clubMemberRepo.create({
           clubId: clubId, userId: userId, status: 'JOIN'
