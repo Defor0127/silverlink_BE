@@ -94,14 +94,4 @@ export class ChatService {
     }
   }
 
-  async startVideoCall(userId: number) {
-    return {
-      message: "영상통화가 시작되었습니다.",
-      data: {
-        userId,
-        callStartedAt: new Date()
-      }
-    }
-  }
-
 }

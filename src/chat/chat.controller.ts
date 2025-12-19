@@ -52,18 +52,5 @@ export class ChatController {
   ) {
     return this.chatService.leaveChatRoom(userId, roomId)
   }
-
-  @Post('/video/start')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: '영상통화 시작', description: '영상통화를 시작합니다. 10분당 300포인트 차감' })
-  @ApiResponse({ status: 200, description: '영상통화 시작 성공' })
-  @ApiResponse({ status: 400, description: '보유 포인트 부족' })
-  @ApiResponse({ status: 401, description: '인증 실패' })
-  async startVideoCall(
-    @User('userId') userId: number
-  ) {
-    return this.chatService.startVideoCall(userId);
-  }
 }
 
