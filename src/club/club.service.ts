@@ -55,14 +55,12 @@ export class ClubService {
         where: { clubName: createClubDto.clubName }
       })
       if (nameExist) {
-        await queryRunner.rollbackTransaction();
         throw new ConflictException("이미 존재하는 모임명입니다.")
       }
       const userExist = await userRepo.findOne({
         where: { id: userId }
       })
       if (!userExist) {
-        await queryRunner.rollbackTransaction();
         throw new NotFoundException("대상 유저가 존재하지 않습니다.")
       }
       // 유료 클럽 생성일 경우 'AWAITING' 상태로 생성, 채팅방은 ADMIN이 승인할 때 생성됨.
