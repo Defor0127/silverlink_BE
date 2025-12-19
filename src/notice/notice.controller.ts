@@ -48,7 +48,7 @@ export class NoticeController {
   @ApiOperation({ summary: '공지사항 상세 조회', description: '특정 공지사항의 상세 정보를 조회합니다.' })
   @ApiParam({ name: 'noticeId', description: '공지사항 ID' })
   @ApiResponse({ status: 200, description: '공지사항 조회 성공' })
-  @ApiResponse({ status: 404, description: '공지사항을 찾을 수 없음' })
+  @ApiResponse({ status: 404, description: '공지사항 조회 실패' })
   async getNotice(
     @Param('noticeId') noticeId: number
   ) {
