@@ -294,7 +294,7 @@ export class PostService {
         1
       )
       const newLike = queryRunner.manager.create(PostLike, {
-        postId: postId, userId
+        postId, userId
       })
       await postLikeRepo.save(newLike)
       await queryRunner.commitTransaction();
@@ -343,12 +343,12 @@ export class PostService {
         throw new NotFoundException("대상 게시물이 없습니다.")
       }
       const saveExist = await postSaveRepo.findOne({
-        where: { postId: postId, userId }
+        where: { postId, userId }
       })
       if (saveExist) {
         await queryRunner.manager.delete(
           PostSave,
-          { postId: postId, userId}
+          { postId, userId }
         )
         await queryRunner.commitTransaction()
         return {
@@ -356,7 +356,7 @@ export class PostService {
         }
       }
       const newSave = await queryRunner.manager.create(PostSave, {
-        postId: postId, userId
+        postId, userId
       })
       await postSaveRepo.save(newSave)
       await queryRunner.commitTransaction();
