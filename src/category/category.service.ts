@@ -100,10 +100,10 @@ export class CategoryService {
       "대상 카테고리가 존재하지 않습니다."
     )
     const updatePostsCategory = await this.postRepository.update(
-      { categoryId }, { categoryId: 15 }
+      { categoryId }, { categoryId: 1 }
     )
     const updateClubsCategory = await this.clubRepository.update(
-      { categoryId }, { categoryId: 15 }
+      { categoryId }, { categoryId: 1 }
     )
     const deleteResult = await this.categoryRepository.delete({
       id: categoryId
