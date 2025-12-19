@@ -6,6 +6,7 @@ import { CreateHubContentDto } from './dto/create-hub-content.dto';
 import { UpdateHubContentDto } from './dto/update-hub-content.dto';
 import { Category } from '@/category/entities/category.entity';
 import { EntityLookupService } from '@/common/services/entity-lookup.service';
+import { Role } from '@/user/enum/role.enum';
 
 @Injectable()
 
@@ -87,10 +88,7 @@ export class HubService {
     }
   }
 
-  async updateHubContent(role: Role, contentId: number, updateHubContentDto: UpdateHubContentDto) {
-    if (role !== 'ADMIN') {
-      throw new UnauthorizedException("대상에 대한 접근 권한이 없습니다.")
-    }
+  async updateHubContent( contentId: number, updateHubContentDto: UpdateHubContentDto) {
     const contentExist = await this.entityLookupService.findOneOrThrow(
       this.seniorContentRepository,
       { id: contentId },
@@ -104,10 +102,7 @@ export class HubService {
     }
   }
 
-  async deleteHubContent(role: Role, contentId: number) {
-    if (role !== 'ADMIN') {
-      throw new UnauthorizedException("대상에 대한 접근 권한이 없습니다.")
-    }
+  async deleteHubContent( contentId: number) {
     const contentExist = await this.entityLookupService.findOneOrThrow(
       this.seniorContentRepository,
       { id: contentId },
